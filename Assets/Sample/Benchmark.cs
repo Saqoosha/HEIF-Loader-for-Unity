@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.UI;
 using System.Diagnostics;
 using System.Collections;
 
@@ -7,9 +6,6 @@ using Debug = UnityEngine.Debug;
 
 public class Benchmark : MonoBehaviour
 {
-    [SerializeField] RawImage rawImageFlipped;
-    [SerializeField] RawImage rawImageNonFlipped;
-    [SerializeField] Text benchmarkResultText;
     [SerializeField] int waitTimeBeforeBenchmark = 3;
     [SerializeField] int loadCount = 10;
 
@@ -59,9 +55,5 @@ public class Benchmark : MonoBehaviour
         // Display results
         string result = $"平均読み込み時間 ({loadCount}回):\nFlipY 有効: {avgFlippedTime:F2}ms\nFlipY 無効: {avgNonFlippedTime:F2}ms";
         Debug.Log(result);
-        if (benchmarkResultText != null)
-        {
-            benchmarkResultText.text = result;
-        }
     }
 }
