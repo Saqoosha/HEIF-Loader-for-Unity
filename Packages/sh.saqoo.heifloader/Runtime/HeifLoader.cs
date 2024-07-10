@@ -40,13 +40,12 @@ public class HeifLoader
         Interleaved = 10
     }
 
-    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
+    [StructLayout(LayoutKind.Sequential, Pack = 1, CharSet = CharSet.Ansi)]
     public struct HeifError
     {
         public int code;
         public int subcode;
-        [MarshalAs(UnmanagedType.LPStr)]
-        public string message;
+        public IntPtr message;
     }
 
     private const string LIBHEIF_DLL = "libheif";
@@ -149,8 +148,8 @@ public class HeifLoader
     {
         if (error.code != 0) // heif_error_Ok
         {
-            Debug.LogError($"HEIF Error: {error.message} (code: {error.code})");
-            throw new Exception($"HEIF Error: {error.message} (code: {error.code})");
+            var message = Marshal.PtrToStringUTF8(error.message);
+            throw new Exception($"HEIF Error: {message} (code: {error.code})");
         }
     }
 }
