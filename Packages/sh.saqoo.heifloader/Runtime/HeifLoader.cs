@@ -93,16 +93,18 @@ public class HeifLoader
     {
         var context = heif_context_alloc();
         var handle = GCHandle.Alloc(data, GCHandleType.Pinned);
+        var image = IntPtr.Zero;
+        var imageHandle = IntPtr.Zero;
         try
         {
             var dataPtr = handle.AddrOfPinnedObject();
             var error = heif_context_read_from_memory_without_copy(context, dataPtr, new IntPtr(data.Length), IntPtr.Zero);
             CheckError(error);
 
-            error = heif_context_get_primary_image_handle(context, out var imageHandle);
+            error = heif_context_get_primary_image_handle(context, out imageHandle);
             CheckError(error);
 
-            error = heif_decode_image(imageHandle, out var image, HeifColorspace.RGB, HeifChroma.InterleavedRGBA, IntPtr.Zero);
+            error = heif_decode_image(imageHandle, out image, HeifColorspace.RGB, HeifChroma.InterleavedRGBA, IntPtr.Zero);
             CheckError(error);
 
             var width = heif_image_get_width(image, HeifChannel.Interleaved);
@@ -125,6 +127,14 @@ public class HeifLoader
         }
         finally
         {
+            if (image != IntPtr.Zero)
+            {
+                heif_image_release(image);
+            }
+            if (imageHandle != IntPtr.Zero)
+            {
+                heif_image_handle_release(imageHandle);
+            }
             handle.Free();
             heif_context_free(context);
         }
