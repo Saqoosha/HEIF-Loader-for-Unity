@@ -152,6 +152,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4505cfce33034ea4bbd4c62d95703802, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  loadNormalMap: 0
   rawImage: {fileID: 211631499}
 --- !u!4 &68274142
 Transform:

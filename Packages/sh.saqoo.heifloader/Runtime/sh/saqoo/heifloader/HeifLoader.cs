@@ -83,13 +83,13 @@ public class HeifLoader
     [DllImport(LIBHEIF_DLL, CallingConvention = CallingConvention.Cdecl)]
     private static extern HeifError heif_context_read_from_memory_without_copy(IntPtr ctx, IntPtr mem, IntPtr size, IntPtr options);
 
-    public static Texture2D Load(string filePath, bool flipY = false)
+    public static Texture2D LoadFromFile(string filePath, bool flipY = false, bool asNormalMap = false)
     {
         var fileData = System.IO.File.ReadAllBytes(filePath);
-        return Load(fileData, flipY);
+        return LoadFromBytes(fileData, flipY, asNormalMap);
     }
 
-    public static Texture2D Load(byte[] data, bool flipY = false)
+    public static Texture2D LoadFromBytes(byte[] data, bool flipY = false, bool asNormalMap = false)
     {
         var context = heif_context_alloc();
         var handle = GCHandle.Alloc(data, GCHandleType.Pinned);
@@ -117,6 +117,11 @@ public class HeifLoader
             if (flipY)
             {
                 FlipTextureVertically(pixelData, width, height);
+            }
+
+            if (asNormalMap)
+            {
+                ConvertToNormalMap(pixelData);
             }
 
             var texture = new Texture2D(width, height, TextureFormat.RGBA32, false);
@@ -151,6 +156,19 @@ public class HeifLoader
             Array.Copy(pixelData, topRowStart, tempRow, 0, bytesPerRow);
             Array.Copy(pixelData, bottomRowStart, pixelData, topRowStart, bytesPerRow);
             Array.Copy(tempRow, 0, pixelData, bottomRowStart, bytesPerRow);
+        }
+    }
+
+    private static void ConvertToNormalMap(byte[] pixelData)
+    {
+        for (int i = 0; i < pixelData.Length; i += 4)
+        {
+            var r = pixelData[i];
+            var g = pixelData[i + 1];
+            pixelData[i] = 0xff;
+            pixelData[i + 1] = g;
+            pixelData[i + 2] = g;
+            pixelData[i + 3] = r;
         }
     }
 

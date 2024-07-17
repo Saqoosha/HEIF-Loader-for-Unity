@@ -35,7 +35,7 @@ public class Benchmark : MonoBehaviour
         for (int i = 0; i < loadCount; i++)
         {
             stopwatch.Restart();
-            var texture = HeifLoader.Load(path, true);
+            var texture = HeifLoader.LoadFromFile(path, true);
             stopwatch.Stop();
             totalFlippedTime += stopwatch.ElapsedMilliseconds;
         }
@@ -44,7 +44,7 @@ public class Benchmark : MonoBehaviour
         for (int i = 0; i < loadCount; i++)
         {
             stopwatch.Restart();
-            var texture = HeifLoader.Load(path, false);
+            var texture = HeifLoader.LoadFromFile(path, false);
             stopwatch.Stop();
             totalNonFlippedTime += stopwatch.ElapsedMilliseconds;
         }
