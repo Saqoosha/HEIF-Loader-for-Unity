@@ -1,6 +1,6 @@
 {
     "name": "sh.saqoo.heifloader",
-    "version": "0.2.0",
+    "version": "0.3.0",
     "displayName": "HEIF Loader",
     "description": "This package provides support for loading HEIF images as texture in Unity.",
     "unity": "2022.3",
