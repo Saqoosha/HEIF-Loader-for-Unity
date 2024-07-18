@@ -3,7 +3,9 @@ using UnityEngine.UI;
 
 public class Loader : MonoBehaviour
 {
-    [SerializeField] bool loadNormalMap = false;
+    [SerializeField] bool mipChain = true;
+    [SerializeField] bool linear = false;
+    [SerializeField] bool isNormalMap = false;
     [SerializeField] RawImage rawImage;
 
     Texture2D texture;
@@ -18,10 +20,10 @@ public class Loader : MonoBehaviour
 
         loadTime = Time.realtimeSinceStartup;
 
-        var filename = loadNormalMap ? "heifloader-normal.heic" : "heifloader.heic";
+        var filename = isNormalMap ? "heifloader-normal.heic" : "heifloader.heic";
         var path = System.IO.Path.Combine(Application.streamingAssetsPath, filename);
         Debug.Log(path);
-        texture = HeifLoader.LoadFromFile(path, true, loadNormalMap);
+        texture = HeifLoader.LoadFromFile(path, flipY: true, mipChain, linear, isNormalMap);
 
         loadTime = Time.realtimeSinceStartup - loadTime;
         Debug.Log("Load time: " + loadTime);

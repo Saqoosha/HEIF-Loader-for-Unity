@@ -83,13 +83,13 @@ public class HeifLoader
     [DllImport(LIBHEIF_DLL, CallingConvention = CallingConvention.Cdecl)]
     private static extern HeifError heif_context_read_from_memory_without_copy(IntPtr ctx, IntPtr mem, IntPtr size, IntPtr options);
 
-    public static Texture2D LoadFromFile(string filePath, bool flipY = false, bool asNormalMap = false)
+    public static Texture2D LoadFromFile(string filePath, bool flipY = false, bool mipChain = true, bool linear = false, bool asNormalMap = false)
     {
         var fileData = System.IO.File.ReadAllBytes(filePath);
-        return LoadFromBytes(fileData, flipY, asNormalMap);
+        return LoadFromBytes(fileData, flipY, mipChain, linear, asNormalMap);
     }
 
-    public static Texture2D LoadFromBytes(byte[] data, bool flipY = false, bool asNormalMap = false)
+    public static Texture2D LoadFromBytes(byte[] data, bool flipY = false, bool mipChain = true, bool linear = false, bool asNormalMap = false)
     {
         var context = heif_context_alloc();
         var handle = GCHandle.Alloc(data, GCHandleType.Pinned);
@@ -124,8 +124,8 @@ public class HeifLoader
                 ConvertToNormalMap(pixelData);
             }
 
-            var texture = new Texture2D(width, height, TextureFormat.RGBA32, false);
-            texture.LoadRawTextureData(pixelData);
+            var texture = new Texture2D(width, height, TextureFormat.RGBA32, mipChain, linear, createUninitialized: true);
+            texture.SetPixelData(pixelData, 0);
             texture.Apply();
 
             return texture;
