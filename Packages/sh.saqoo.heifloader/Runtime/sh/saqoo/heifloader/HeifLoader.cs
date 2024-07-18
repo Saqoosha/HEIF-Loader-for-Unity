@@ -1,7 +1,8 @@
 using System;
 using System.Runtime.InteropServices;
-using UnityEngine;
+using System.Threading.Tasks;
 
+using UnityEngine;
 
 public class HeifLoader
 {
@@ -83,13 +84,31 @@ public class HeifLoader
     [DllImport(LIBHEIF_DLL, CallingConvention = CallingConvention.Cdecl)]
     private static extern HeifError heif_context_read_from_memory_without_copy(IntPtr ctx, IntPtr mem, IntPtr size, IntPtr options);
 
+    public static async Task<Texture2D> LoadFromFileAsync(string filePath, bool flipY = false, bool mipChain = true, bool linear = false, bool asNormalMap = false)
+    {
+        var fileData = await System.IO.File.ReadAllBytesAsync(filePath);
+        return await LoadFromBytesAsync(fileData, flipY, mipChain, linear, asNormalMap);
+    }
+
     public static Texture2D LoadFromFile(string filePath, bool flipY = false, bool mipChain = true, bool linear = false, bool asNormalMap = false)
     {
         var fileData = System.IO.File.ReadAllBytes(filePath);
         return LoadFromBytes(fileData, flipY, mipChain, linear, asNormalMap);
     }
 
+    public static async Task<Texture2D> LoadFromBytesAsync(byte[] data, bool flipY = false, bool mipChain = true, bool linear = false, bool asNormalMap = false)
+    {
+        var pixelData = await Task.Run(() => DecodeHeifData(data, flipY, asNormalMap));
+        return CreateTexture(pixelData, mipChain, linear);
+    }
+
     public static Texture2D LoadFromBytes(byte[] data, bool flipY = false, bool mipChain = true, bool linear = false, bool asNormalMap = false)
+    {
+        var pixelData = DecodeHeifData(data, flipY, asNormalMap);
+        return CreateTexture(pixelData, mipChain, linear);
+    }
+
+    private static (byte[] pixelData, int width, int height) DecodeHeifData(byte[] data, bool flipY, bool asNormalMap)
     {
         var context = heif_context_alloc();
         var handle = GCHandle.Alloc(data, GCHandleType.Pinned);
@@ -124,11 +143,7 @@ public class HeifLoader
                 ConvertToNormalMap(pixelData);
             }
 
-            var texture = new Texture2D(width, height, TextureFormat.RGBA32, mipChain, linear, createUninitialized: true);
-            texture.SetPixelData(pixelData, 0);
-            texture.Apply();
-
-            return texture;
+            return (pixelData, width, height);
         }
         finally
         {
@@ -143,6 +158,14 @@ public class HeifLoader
             handle.Free();
             heif_context_free(context);
         }
+    }
+
+    private static Texture2D CreateTexture((byte[] pixelData, int width, int height) pixelData, bool mipChain, bool linear)
+    {
+        var texture = new Texture2D(pixelData.width, pixelData.height, TextureFormat.RGBA32, mipChain, linear, createUninitialized: true);
+        texture.SetPixelData(pixelData.pixelData, 0);
+        texture.Apply(true, true);
+        return texture;
     }
 
     private static void FlipTextureVertically(byte[] pixelData, int width, int height)

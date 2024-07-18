@@ -3,6 +3,8 @@ using UnityEngine.UI;
 
 public class Loader : MonoBehaviour
 {
+    [SerializeField] bool useAsync = true;
+    [SerializeField] bool flipY = true;
     [SerializeField] bool mipChain = true;
     [SerializeField] bool linear = false;
     [SerializeField] bool isNormalMap = false;
@@ -11,7 +13,7 @@ public class Loader : MonoBehaviour
     Texture2D texture;
     float loadTime;
 
-    void Load()
+    async void Load()
     {
         if (texture != null)
         {
@@ -23,7 +25,14 @@ public class Loader : MonoBehaviour
         var filename = isNormalMap ? "heifloader-normal.heic" : "heifloader.heic";
         var path = System.IO.Path.Combine(Application.streamingAssetsPath, filename);
         Debug.Log(path);
-        texture = HeifLoader.LoadFromFile(path, flipY: true, mipChain, linear, isNormalMap);
+        if (useAsync)
+        {
+            texture = await HeifLoader.LoadFromFileAsync(path, flipY, mipChain, linear, isNormalMap);
+        }
+        else
+        {
+            texture = HeifLoader.LoadFromFile(path, flipY, mipChain, linear, isNormalMap);
+        }
 
         loadTime = Time.realtimeSinceStartup - loadTime;
         Debug.Log("Load time: " + loadTime);
