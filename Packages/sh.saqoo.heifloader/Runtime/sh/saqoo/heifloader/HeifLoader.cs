@@ -108,7 +108,7 @@ public class HeifLoader
         return CreateTexture(pixelData, mipChain, linear);
     }
 
-    private static (byte[] pixelData, int width, int height) DecodeHeifData(byte[] data, bool flipY, bool asNormalMap)
+    public static (byte[] pixelData, int width, int height) DecodeHeifData(byte[] data, bool flipY, bool asNormalMap)
     {
         var context = heif_context_alloc();
         var handle = GCHandle.Alloc(data, GCHandleType.Pinned);
