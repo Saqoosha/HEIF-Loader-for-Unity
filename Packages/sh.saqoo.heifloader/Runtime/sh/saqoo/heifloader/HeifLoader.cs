@@ -131,7 +131,12 @@ public class HeifLoader
 
             var pixelDataPtr = heif_image_get_plane_readonly(image, HeifChannel.Interleaved, out var stride);
             var pixelData = new byte[width * height * 4];
-            Marshal.Copy(pixelDataPtr, pixelData, 0, pixelData.Length);
+            var rowSize = width * 4;
+
+            for (var y = 0; y < height; y++)
+            {
+                Marshal.Copy(pixelDataPtr + (y * stride), pixelData, y * rowSize, rowSize);
+            }
 
             if (flipY)
             {
