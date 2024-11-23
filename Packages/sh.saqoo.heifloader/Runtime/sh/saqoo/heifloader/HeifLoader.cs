@@ -135,12 +135,8 @@ public class HeifLoader
 
             for (var y = 0; y < height; y++)
             {
-                Marshal.Copy(pixelDataPtr + (y * stride), pixelData, y * rowSize, rowSize);
-            }
-
-            if (flipY)
-            {
-                FlipTextureVertically(pixelData, width, height);
+                var srcY = flipY ? (height - 1 - y) : y;
+                Marshal.Copy(pixelDataPtr + (srcY * stride), pixelData, y * rowSize, rowSize);
             }
 
             if (asNormalMap)
@@ -171,20 +167,6 @@ public class HeifLoader
         texture.SetPixelData(pixelData.pixelData, 0);
         texture.Apply(true, true);
         return texture;
-    }
-
-    private static void FlipTextureVertically(byte[] pixelData, int width, int height)
-    {
-        var bytesPerRow = width * 4;
-        var tempRow = new byte[bytesPerRow];
-        for (int y = 0; y < height / 2; y++)
-        {
-            var topRowStart = y * bytesPerRow;
-            var bottomRowStart = (height - 1 - y) * bytesPerRow;
-            Array.Copy(pixelData, topRowStart, tempRow, 0, bytesPerRow);
-            Array.Copy(pixelData, bottomRowStart, pixelData, topRowStart, bytesPerRow);
-            Array.Copy(tempRow, 0, pixelData, bottomRowStart, bytesPerRow);
-        }
     }
 
     private static void ConvertToNormalMap(byte[] pixelData)
